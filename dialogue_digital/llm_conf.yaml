@@ -1,0 +1,11 @@
+maas_api_conf:
+  maas_api_url: ''
+  maas_api_key:
+    common_use: ''
+  asr_url: ''
+  tts_url: ''
+sys_conf:
+  cfg_path: ''
+  write_file_dir: ''
+
+
