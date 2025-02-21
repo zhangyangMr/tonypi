@@ -32,28 +32,9 @@ class TTSClient:
 
     def send_message(self, message, wait_time=5):
         """发送消息到 WebSocket 服务器"""
-        # CHUNK = 1024  # 每个缓冲区的帧数
-        # FORMAT = pyaudio.paInt16  # 音频格式
-        # CHANNELS = 1  # 单声道
-        # RATE = 16000  # 采样率
-        # p = pyaudio.PyAudio()
-        # # 打开扬声器输出流
-        # output_stream = p.open(format=FORMAT,
-        #                        channels=CHANNELS,
-        #                        rate=RATE,
-        #                        output=True,
-        #                        frames_per_buffer=CHUNK)
         if self.websocket:
             self.websocket.send(message)
-            logging.info(f"Sent message: {message}")
-            # while True:
-            #     msg = self.msg_queue.get(timeout=wait_time)
-            #     logging.info(f"Sent message get : {msg}")
-            #     if self.msg_queue.empty():
-            #         break
-            #     logging.info(f"Sent message get : {msg}")
-            #     audio_data = base64.b64decode(msg)
-            #     output_stream.write(audio_data)
+            # logging.info(f"Sent message: {message}")
 
     def receive_message(self):
         """接收来自 WebSocket 服务器的消息"""
@@ -69,6 +50,7 @@ class TTSClient:
                                rate=RATE,
                                output=True,
                                frames_per_buffer=CHUNK)
+
         while self.running:
             try:
                 message = self.websocket.recv()
@@ -80,7 +62,6 @@ class TTSClient:
                     # logging.info("播放声音")
                     audio_data = base64.b64decode(data['speech'])
                     output_stream.write(audio_data)
-                    # self.msg_queue.put(data['speech'])
             except Exception as e:
                 logging.error(f"Error receiving message: {e}")
                 break
@@ -115,21 +96,25 @@ class TTSClient:
         """循环发送消息"""
         messages = [
             json.dumps(
-                {"text": "1111哪吒2你看了吗，请说一下哪吒2为什么爆火？", "speed": 1.0, "role": "byjk_female_康玥莹01",
-                 "sample_rate": 16000}),
+                {
+                    "text": "秋日的阳光洒满大地，金黄的树叶在微风中轻轻摇曳。漫步在林间小道上，脚下是松软的落叶，耳边是鸟儿的清脆鸣叫。空气中弥漫着泥土的芬芳，仿佛大自然在低声诉说着季节的更替。这一刻，时间仿佛静止，心灵也随着宁静的景色沉静下来。秋天，不仅是收获的季节，更是感受生命美好的时刻。",
+                    "speed": 1.0,
+                    "role": "byjk_female_康玥莹01",
+                    "sample_rate": 15000,
+                    "chunk_size": 12000,
+                }),
         ]
 
         for msg in messages:
             self.send_message(msg)
             time.sleep(2)  # 每隔 2 秒发送一条消息
 
-
 # if __name__ == "__main__":
 #     # WebSocket 服务器地址
 #     ws_uri = "chats-ai-bobfin-prep.tests.net.cn/innovationteam/multimodal/voice/tts/stream"
 #
 #     # 创建 WebSocket 客户端实例
-#     client = WebSocketClient(ws_uri)
+#     client = TTSClient(ws_uri)
 #
 #     try:
 #         # 启动 WebSocket 客户端

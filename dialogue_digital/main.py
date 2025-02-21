@@ -11,6 +11,7 @@ from cfg_utils import read_llm_cfg, reflect_json_2_class
 from llm_config import LLMConfig, MaasApiConf
 from llm import init_maasapi_llm_chain
 from utils import starts_with_chinese_pinyin
+from utils_robot import *
 
 # 初始化日志模块
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s %(filename)s:%(lineno)d - %(message)s')
@@ -62,17 +63,34 @@ if __name__ == '__main__':
             # logging.info(f"asr_msg: {asr_msg}")
 
             if len(asr_msg) > 0:
-                if starts_with_chinese_pinyin(asr_msg["text"], "小鲸同学"):
+                if starts_with_chinese_pinyin(asr_msg["text"], "小明同学"):
                     chat_response = maas_chain.chat(asr_msg["text"], False)
                     if chat_response.status_code == 200:
                         chat_result = chat_response.json()
                         if chat_result.get("code") == 200:
                             chat_text = chat_result["data"]["text"]
+
+                            chat_text = chat_text.replace("'", '"')
+                            chat_text_json = json.loads(chat_text)
+
+                            action = chat_text_json["action"]
+                            res_text = chat_text_json["response"]
+                            logging.info(f"chat_text: {chat_text}")
+
                             msg = json.dumps(
-                                {"text": chat_text, "speed": 1.0, "role": "byjk_female_康玥莹01",
-                                 "sample_rate": 16000},
+                                {
+                                    "text": res_text,
+                                    "speed": 1.2,
+                                    "role": "byjk_female_康玥莹01",
+                                    "sample_rate": 15000,
+                                    "chunk_size": 4000,
+                                },
                                 ensure_ascii=False)
                             tts_client.send_message(msg)
+
+                            for ac in action:
+                                logging.info(f"执行动作: {ac}")
+                                eval(ac)
                     else:
                         msg = json.dumps(
                             {"text": f"抱歉调用大模型错误，错误代码{chat_response.status_code}", "speed": 1.0,
@@ -83,6 +101,6 @@ if __name__ == '__main__':
 
 
     except KeyboardInterrupt:
-        print("录音被用户中断")
+        logging.info("录音被用户中断")
 
-    print("录音结束")
+    logging.info("录音结束")
