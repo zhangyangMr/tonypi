@@ -1,0 +1,1 @@
+['squat()', 'stand()', 'celebrate()']
