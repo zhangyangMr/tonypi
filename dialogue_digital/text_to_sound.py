@@ -13,13 +13,13 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s %(fi
 
 
 class TTSClient:
-    def __init__(self, uri):
+    def __init__(self, uri, tts_queue):
         self.uri = "wss://{}".format(uri)
         self.ssl_context = None
         self.ssl_opt = None
         self.websocket = None
         self.running = False
-        self.msg_queue = Queue()
+        self.tts_queue = tts_queue
 
     def connect(self):
         """建立 WebSocket 连接"""
@@ -33,8 +33,21 @@ class TTSClient:
     def send_message(self, message, wait_time=5):
         """发送消息到 WebSocket 服务器"""
         if self.websocket:
-            self.websocket.send(message)
-            # logging.info(f"Sent message: {message}")
+            data = {
+                "text": message,
+                "speed": 1.0,
+                "role": "byjk_female_康玥莹01",
+                "sample_rate": 16000
+            }
+            # data = {
+            #     "text": message,
+            #     "speed": 0.95,
+            #     "role": "byjk_male_西游记孙悟空01",
+            #     "sample_rate": 16000
+            # }
+            msg = json.dumps(data, ensure_ascii=False)
+            logging.info(f"Sent message: {msg}")
+            self.websocket.send(msg)
 
     def receive_message(self):
         """接收来自 WebSocket 服务器的消息"""
@@ -55,9 +68,12 @@ class TTSClient:
             try:
                 message = self.websocket.recv()
                 data = json.loads(message)
-                # logging.info(f"Received message: {data['speech']}")
+                logging.info(f"Received data: {data}")
+                logging.info(f"Received message: {data['speech']}")
                 if data['speech'] is None:
                     logging.info("声音接收成功")
+                    self.tts_queue.get()
+                    self.tts_queue.task_done()
                 else:
                     # logging.info("播放声音")
                     audio_data = base64.b64decode(data['speech'])

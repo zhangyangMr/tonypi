@@ -60,6 +60,7 @@ class AsrOnline:
 
                 self.msg_queue.put(msg)
         except Exception as e:
+            self.websocket = None
             logging.info("client closed")
 
     # feed data to asr engine, wait_time means waiting for result until time out

@@ -36,7 +36,7 @@ class MaaSApiChain(object):
             'inputs': {},
             'query': query,
             'streaming': streaming,
-            'with_history': True
+            'with_history': False
         }
         if conversation_id is not None:
             data['conversationId'] = conversation_id

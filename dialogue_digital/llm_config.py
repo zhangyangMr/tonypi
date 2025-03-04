@@ -4,7 +4,9 @@ from typing import List
 
 @dataclass
 class MaasApiKey:
-    common_use: str
+    robot: str  # 机器人指令大模型key
+    chat: str  # 机器人文档大模型key
+    classify: str  # 机器人问题分类大模型key
 
 
 @dataclass

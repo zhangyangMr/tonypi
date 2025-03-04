@@ -18,10 +18,12 @@ def init_maasapi_llm_chain(cfg: LLMConfig, prompt_type: str = 'common_use'):
     api_key = ''
     api_url = maas_api_cfg.maas_api_url
 
-    if prompt_type == 'common_use':
-        api_key = llm_cfg.common_use
+    if prompt_type == 'robot':
+        api_key = llm_cfg.robot
+    elif prompt_type == 'chat':
+        api_key = llm_cfg.chat
     else:
-        api_key = llm_cfg.common_use
+        api_key = llm_cfg.classify
 
     chain = MaaSApiChain(api_url, api_key)
 

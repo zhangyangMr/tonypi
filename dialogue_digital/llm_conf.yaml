@@ -1,11 +1,11 @@
 maas_api_conf:
-  maas_api_url: ''
+  maas_api_url: 'https://ai.bobfintech.com.cn/maas-api/api/app/completion/'
   maas_api_key:
-    common_use: ''
-  asr_url: ''
-  tts_url: ''
+    robot: 'BOB_MAAS-zXtO9qVk.EX6Sj7DUWCXigYa5zWoCe446900wbBV4'
+    chat: 'BOB_MAAS-AEqdPklI.j9nGGE2oisc0xhgSXu0i410IbdpK7SPb'
+    classify: 'BOB_MAAS-LbwogAmy.In9CKl78EdCsgslragvNsx7aH5NoS8B3'
+  asr_url: 'chats-ai-bobfin-prep.tests.net.cn/innovationteam/multimodal/voice/asr/asr_online'
+  tts_url: 'chats-ai-bobfin-prep.tests.net.cn/innovationteam/multimodal/voice/tts/stream'
 sys_conf:
   cfg_path: ''
   write_file_dir: ''
-
-

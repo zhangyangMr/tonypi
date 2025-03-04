@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
+import threading
+import time
 
 import pyaudio
 import logging
 import json
+import queue
 
 from sound_to_text import AsrOnline
 from text_to_sound import TTSClient
@@ -11,10 +14,66 @@ from cfg_utils import read_llm_cfg, reflect_json_2_class
 from llm_config import LLMConfig, MaasApiConf
 from llm import init_maasapi_llm_chain
 from utils import starts_with_chinese_pinyin
-from utils_robot import *
+
+# from utils_robot import *
 
 # 初始化日志模块
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s %(filename)s:%(lineno)d - %(message)s')
+
+
+def deal_response(response):
+    """对大模型返回结果进行统一数据处理"""
+    if response.status_code == 200:
+        chat_result = response.json()
+        if chat_result.get("code") == 200:
+            return chat_result.get("data")
+        else:
+            tmp_text = f"抱歉调用大模型错误，错误代码{response.status_code}"
+            logging.info(f"deal_response tmp text: {tmp_text}")
+    else:
+        tmp_text = f"抱歉调用大模型错误，错误代码{response.status_code}"
+        logging.info(f"deal_response tmp text: {tmp_text}")
+
+
+def chat_maas(robot_maas_chain, chat_maas_chain, classify_maas_chain, tts_client, asr_msg):
+    """和大模型进行交互"""
+
+    # 对外界语音进行分类，是动作类action，还是聊天类chat
+    classify_response = classify_maas_chain.chat(asr_msg)
+    classify_result = deal_response(classify_response)
+    logging.info(f"classify_result: {classify_result}")
+
+    classify_result_text = classify_result["text"]
+    classify_text_list = json.loads(classify_result_text)
+
+    for classify_text in classify_text_list:
+        if classify_text == "chat":
+            chat_response = chat_maas_chain.chat(asr_msg)
+            chat_result = deal_response(chat_response)
+            logging.info(f"chat_result: {chat_result}")
+
+            chat_result_text = chat_result["text"]
+            logging.info(f"chat_result_text: {chat_result_text}; type: {type(chat_result_text)}")
+            tts_client.send_message(chat_result_text)
+        else:
+            # 获取机器人动作指令
+            robot_response = robot_maas_chain.chat(asr_msg, False)
+            robot_result = deal_response(robot_response)
+            logging.info(f"robot_result: {robot_result}")
+
+            robot_result_text = robot_result["text"]
+            robot_result_text = robot_result_text.replace("'", '"')
+            robot_text_json = json.loads(robot_result_text)
+
+            robot_action = robot_text_json["action"]
+            robot_text = robot_text_json["response"]
+            logging.info(f"robot_text: {robot_text}")
+            tts_client.send_message(robot_text)
+
+            for ac in robot_action:
+                logging.info(f"执行动作: {ac}")
+                # eval(ac)
+
 
 if __name__ == '__main__':
     cfg_path = "./llm_conf.yaml"
@@ -26,7 +85,13 @@ if __name__ == '__main__':
 
     maas_api_cfg = reflect_json_2_class(model_detail_config.maas_api_conf, MaasApiConf)
 
-    maas_chain = init_maasapi_llm_chain(model_detail_config, "common_use")
+    # 初始化大模型client
+    classify_maas_chain = init_maasapi_llm_chain(model_detail_config, "classify")
+    robot_maas_chain = init_maasapi_llm_chain(model_detail_config, "robot")
+    chat_maas_chain = init_maasapi_llm_chain(model_detail_config, "chat")
+
+    # 创建一个队列，控制tts发送和接收数据一一对应
+    tts_queue = queue.Queue(maxsize=1)
 
     # 音频参数
     FORMAT = pyaudio.paInt16  # 16位深度
@@ -45,60 +110,49 @@ if __name__ == '__main__':
                           frames_per_buffer=CHUNK)
     # 初始化asr
     asr_client = AsrOnline(
-        uri=maas_api_cfg.asr_url, is_ssl=False,
-        chunk_size="-1, 10, 5", mode="2pass")
+        uri=maas_api_cfg.asr_url,
+        is_ssl=False,
+        chunk_size="-1, 10, 5",
+        mode="2pass"
+    )
 
     # 初始化TTS
     tts_uri = maas_api_cfg.tts_url
-    tts_client = TTSClient(tts_uri)
+    tts_client = TTSClient(tts_uri, tts_queue)
     tts_client.start()
 
     try:
         while True:
+            time.sleep(0.01)
+            tts_queue.put(1)
             # 从麦克风持续读取数据
             # logging.info("开始从麦克风读取音频数据...")
             data = input_stream.read(CHUNK, exception_on_overflow=False)
 
-            asr_msg = asr_client.feed_chunk(data, wait_time=0.02)
+            # 重连asr_client
+            if asr_client.websocket is None:
+                # 初始化asr
+                asr_client = AsrOnline(
+                    uri=maas_api_cfg.asr_url,
+                    is_ssl=False,
+                    chunk_size="-1, 10, 5",
+                    mode="2pass"
+                )
+                asr_msg = asr_client.feed_chunk(data, wait_time=0.02)
+            else:
+                asr_msg = asr_client.feed_chunk(data, wait_time=0.02)
+
             # logging.info(f"asr_msg: {asr_msg}")
 
             if len(asr_msg) > 0:
-                if starts_with_chinese_pinyin(asr_msg["text"], "小明同学"):
-                    chat_response = maas_chain.chat(asr_msg["text"], False)
-                    if chat_response.status_code == 200:
-                        chat_result = chat_response.json()
-                        if chat_result.get("code") == 200:
-                            chat_text = chat_result["data"]["text"]
-
-                            chat_text = chat_text.replace("'", '"')
-                            chat_text_json = json.loads(chat_text)
-
-                            action = chat_text_json["action"]
-                            res_text = chat_text_json["response"]
-                            logging.info(f"chat_text: {chat_text}")
-
-                            msg = json.dumps(
-                                {
-                                    "text": res_text,
-                                    "speed": 1.2,
-                                    "role": "byjk_female_康玥莹01",
-                                    "sample_rate": 15000,
-                                    "chunk_size": 4000,
-                                },
-                                ensure_ascii=False)
-                            tts_client.send_message(msg)
-
-                            for ac in action:
-                                logging.info(f"执行动作: {ac}")
-                                eval(ac)
-                    else:
-                        msg = json.dumps(
-                            {"text": f"抱歉调用大模型错误，错误代码{chat_response.status_code}", "speed": 1.0,
-                             "role": "byjk_female_康玥莹01",
-                             "sample_rate": 16000},
-                            ensure_ascii=False)
-                        tts_client.send_message(msg)
-
+                if starts_with_chinese_pinyin(asr_msg["text"], "小宝"):
+                    chat_maas(robot_maas_chain, chat_maas_chain, classify_maas_chain, tts_client, asr_msg["text"])
+                else:
+                    tts_queue.get()
+                    tts_queue.task_done()
+            else:
+                tts_queue.get()
+                tts_queue.task_done()
 
     except KeyboardInterrupt:
         logging.info("录音被用户中断")
