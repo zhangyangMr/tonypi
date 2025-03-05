@@ -68,7 +68,7 @@ def result(task_id: str):
             return None
 
 
-def request():
+def request(question: str):
     url = "https://aip.baidubce.com/rest/2.0/image-classify/v1/image-understanding/request?access_token=" + get_access_token()
 
     img_path = "./frame.jpg"
@@ -77,7 +77,7 @@ def request():
 
     data = {
         "image": content,
-        "question": "这张图片里有什么？"
+        "question": question
     }
 
     payload = json.dumps(data, ensure_ascii=False)
@@ -94,8 +94,10 @@ def request():
     else:
         return None
 
+
 if __name__ == '__main__':
-    task_id = request()
+    question = "说说你都看到了什么?"
+    task_id = request(question)
     time.sleep(5)
     if task_id is not None:
         desc = result(task_id)
