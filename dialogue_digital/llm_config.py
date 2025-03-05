@@ -15,6 +15,7 @@ class MaasApiConf:
     maas_api_key: MaasApiKey
     asr_url: str
     tts_url: str
+    tts_base_url: str
 
 
 @dataclass

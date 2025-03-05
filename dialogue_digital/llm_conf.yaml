@@ -6,6 +6,7 @@ maas_api_conf:
     classify: 'BOB_MAAS-LbwogAmy.In9CKl78EdCsgslragvNsx7aH5NoS8B3'
   asr_url: 'chats-ai-bobfin-prep.tests.net.cn/innovationteam/multimodal/voice/asr/asr_online'
   tts_url: 'chats-ai-bobfin-prep.tests.net.cn/innovationteam/multimodal/voice/tts/stream'
+  tts_base_url: 'https://chats-ai-bobfin-prep.tests.net.cn/innovationteam/'
 sys_conf:
   cfg_path: ''
   write_file_dir: ''

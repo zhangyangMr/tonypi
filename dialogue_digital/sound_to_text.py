@@ -66,6 +66,7 @@ class AsrOnline:
     # feed data to asr engine, wait_time means waiting for result until time out
     def feed_chunk(self, chunk, wait_time=0.01):
         try:
+            # logging.info(f"feed_chunk 发送语音消息")
             self.websocket.send(chunk, ABNF.OPCODE_BINARY)
             # loop to check if there is a message, timeout in 0.01s
             while True:

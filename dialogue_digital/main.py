@@ -14,6 +14,7 @@ from cfg_utils import read_llm_cfg, reflect_json_2_class
 from llm_config import LLMConfig, MaasApiConf
 from llm import init_maasapi_llm_chain
 from utils import starts_with_chinese_pinyin
+from text_to_wav_file import text_to_wav_file
 
 # from utils_robot import *
 
@@ -35,7 +36,7 @@ def deal_response(response):
         logging.info(f"deal_response tmp text: {tmp_text}")
 
 
-def chat_maas(robot_maas_chain, chat_maas_chain, classify_maas_chain, tts_client, asr_msg):
+def chat_maas(robot_maas_chain, chat_maas_chain, classify_maas_chain, tts_client, tts_base_url, asr_msg, tts_queue):
     """和大模型进行交互"""
 
     # 对外界语音进行分类，是动作类action，还是聊天类chat
@@ -54,7 +55,8 @@ def chat_maas(robot_maas_chain, chat_maas_chain, classify_maas_chain, tts_client
 
             chat_result_text = chat_result["text"]
             logging.info(f"chat_result_text: {chat_result_text}; type: {type(chat_result_text)}")
-            tts_client.send_message(chat_result_text)
+            # tts_client.send_message(chat_result_text)
+            text_to_wav_file(tts_base_url, chat_result_text)
         else:
             # 获取机器人动作指令
             robot_response = robot_maas_chain.chat(asr_msg, False)
@@ -68,11 +70,14 @@ def chat_maas(robot_maas_chain, chat_maas_chain, classify_maas_chain, tts_client
             robot_action = robot_text_json["action"]
             robot_text = robot_text_json["response"]
             logging.info(f"robot_text: {robot_text}")
-            tts_client.send_message(robot_text)
+            # tts_client.send_message(robot_text)
+            text_to_wav_file(tts_base_url, robot_text)
 
             for ac in robot_action:
                 logging.info(f"执行动作: {ac}")
                 # eval(ac)
+    tts_queue.get()
+    tts_queue.task_done()
 
 
 if __name__ == '__main__':
@@ -138,15 +143,15 @@ if __name__ == '__main__':
                     chunk_size="-1, 10, 5",
                     mode="2pass"
                 )
-                asr_msg = asr_client.feed_chunk(data, wait_time=0.02)
+                asr_msg = asr_client.feed_chunk(data, wait_time=0.01)
             else:
-                asr_msg = asr_client.feed_chunk(data, wait_time=0.02)
-
-            # logging.info(f"asr_msg: {asr_msg}")
+                asr_msg = asr_client.feed_chunk(data, wait_time=0.01)
 
             if len(asr_msg) > 0:
+                logging.info(f"asr_msg: {asr_msg}")
                 if starts_with_chinese_pinyin(asr_msg["text"], "小宝"):
-                    chat_maas(robot_maas_chain, chat_maas_chain, classify_maas_chain, tts_client, asr_msg["text"])
+                    chat_maas(robot_maas_chain, chat_maas_chain, classify_maas_chain, tts_client,
+                              maas_api_cfg.tts_base_url, asr_msg["text"], tts_queue)
                 else:
                     tts_queue.get()
                     tts_queue.task_done()
