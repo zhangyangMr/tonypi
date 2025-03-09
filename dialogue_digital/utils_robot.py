@@ -101,30 +101,49 @@ def stand_up_back():
     AGC.runActionGroup('stand_up_back')
 
 
-# 田径运动：巡线、跨栏、上下台阶
-def athletics():
-    os.system('python /home/pi/TonyPi/Extend/athletics_course/athletics_perform_only.py')
+# 跳一支小苹果舞蹈
+def dance_little_apple():
+    AGC.runActionGroup('18')
+
+# 跳一支超级冠军舞蹈
+def dance_super_champion():
+    AGC.runActionGroup('22')
+
+# 跳一支爱出发舞蹈
+def dance_love_goes():
+    AGC.runActionGroup('24')
+
+# # 踢足球
+# def kickball():
+#     color='red'
+#     terminal = 'python /home/pi/TonyPi/Functions/KickBall_only_once.py {}'.format(color)
+#     print('terminal', terminal)
+#     os.system(terminal)
+
+# # 田径运动：巡线、跨栏、上下台阶
+# def athletics():
+#     os.system('python /home/pi/TonyPi/Extend/athletics_course/athletics_perform_only.py')
 
 
-# 唱跳RAP
-def rap():
-    os.system('python /home/pi/TonyPi/Extend/sensor_course/sensor_development/little_apple.py')
-
-
-# 踢足球
-def kickball(color='red'):
-    terminal = 'python /home/pi/TonyPi/Functions/KickBall_only_once.py {}'.format(color)
-    print('terminal', terminal)
-    os.system(terminal)
-
-
-# 搬运海绵方块
-def transport(color_list_str='red green blue'):
-    color_list = color_list_str.split(' ')
-    terminal = 'python /home/pi/TonyPi/Functions/Transport_only.py "{}"'.format(color_list)
-    print('terminal', terminal)
-    os.system(terminal)
-
+# # 唱跳RAP
+# def rap():
+#     os.system('python /home/pi/TonyPi/Extend/sensor_course/sensor_development/little_apple.py')
+#
+#
+# # 踢足球
+# def kickball(color='red'):
+#     terminal = 'python /home/pi/TonyPi/Functions/KickBall_only_once.py {}'.format(color)
+#     print('terminal', terminal)
+#     os.system(terminal)
+#
+#
+# # 搬运海绵方块
+# def transport(color_list_str='red green blue'):
+#     color_list = color_list_str.split(' ')
+#     terminal = 'python /home/pi/TonyPi/Functions/Transport_only.py "{}"'.format(color_list)
+#     print('terminal', terminal)
+#     os.system(terminal)
+#
 
 # if __name__ == '__main__':
 #     agent_plan = ['move_forward()', 'move_forward()', 'stepping()', 'wing_chun()']
