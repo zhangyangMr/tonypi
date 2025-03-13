@@ -135,7 +135,7 @@ if __name__ == '__main__':
     tts_client.start()
 
     # 初始化摄像头
-    start_camera()
+    start_camera(model_detail_config,maas_api_cfg)
 
     try:
         while True:
