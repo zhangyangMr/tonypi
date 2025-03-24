@@ -1,0 +1,33 @@
+llm:
+  llm_type: ''
+  maas:
+    maas_api_url: ''
+    maas_api_key:
+      robot: ''
+      chat: ''
+      classify: ''
+
+tts:
+  tts_type: ''
+  bobfintech:
+    tts_url: ''
+    tts_base_url: ''
+    tts_api_key: ''
+
+stt:
+  stt_type: ''
+  bobfintech:
+    asr_url: ''
+    asr_api_key: ''
+    asr_base_url: ''
+    asr_model_id: ''
+
+img_understand:
+  img_understand_type: ''
+  baidu:
+    api_key: ''
+    secret_key: ''
+    api_url: ''
+    token_url: ''
+
+log_level: 'debug'
