@@ -45,3 +45,5 @@ def task_act(chat_queue, act_queue, img_recognition_queue, face_recognition_queu
         for ac in robot_action:
             logging.info(f"执行动作: {ac}")
             eval(ac)
+
+        act_queue.task_done()

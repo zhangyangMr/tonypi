@@ -39,3 +39,4 @@ def task_img(chat_queue, act_queue, img_recognition_queue, face_recognition_queu
         else:
             # tts_client.send_message("百度AI图像接口错误")
             text_to_wav_file(tts_base_url, "百度AI图像接口错误")
+        img_recognition_queue.task_done()

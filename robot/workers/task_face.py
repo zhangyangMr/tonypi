@@ -47,3 +47,5 @@ def task_face(chat_queue, act_queue, img_recognition_queue, face_recognition_que
             text_to_wav_file(tts_base_url, chat_result_text)
         else:
             cv2.putText(frame, "Unknown Person", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+
+        face_recognition_queue.task_done()

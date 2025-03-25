@@ -33,3 +33,4 @@ def task_chat(chat_queue, act_queue, img_recognition_queue, face_recognition_que
         # 播放声音
         chat_result_text = chat_result["text"]
         text_to_wav_file(tts_base_url, chat_result_text)
+        chat_queue.task_done()

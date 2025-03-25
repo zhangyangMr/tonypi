@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+import sys
+# sys.path.append("D:\\gopath\\src\\github.com\\TommyZihao\\tonypi")
+sys.path.append("/home/pi/zhangyang")
+
 import pyaudio
 import logging
 import json
@@ -8,12 +12,12 @@ import logging
 import threading
 from robot.config.config import load_config
 from robot.stt.asr import AsrOnline
-from workers.task_chat import task_chat
-from workers.task_act import task_act
-from workers.task_classify import task_classify
-from workers.task_img import task_img
-from workers.task_face import task_face
-from workers.task_camera import task_camera
+from robot.workers.task_chat import task_chat
+from robot.workers.task_act import task_act
+from robot.workers.task_classify import task_classify
+from robot.workers.task_img import task_img
+from robot.workers.task_face import task_face
+from robot.workers.task_camera import task_camera
 
 if __name__ == "__main__":
     # 加载配置文件
