@@ -8,6 +8,7 @@ import time
 from robot.config.config import load_config
 from robot.stt.asr import AsrOnline
 from robot.utils.utils import starts_with_chinese_pinyin, deal_maas_response
+# from robot.utils.wake_up import wake_up
 from robot.llm.llm_factory import ModelFactory
 
 
@@ -65,7 +66,7 @@ def task_classify(chat_queue, act_queue, img_recognition_queue, face_recognition
                 asr_msg = asr_client.feed_chunk(data, wait_time=0.01)
 
             if len(asr_msg) > 0:
-                logging.debug(f"接收的音频 asr_msg: {asr_msg}")
+                logging.info(f"接收的音频 asr_msg: {asr_msg}")
                 asr_msg_text = asr_msg["text"]
                 if starts_with_chinese_pinyin(asr_msg_text, "小宝"):
                     classify_response = llm_factory.chat(asr_msg_text, streaming=False)
@@ -76,16 +77,19 @@ def task_classify(chat_queue, act_queue, img_recognition_queue, face_recognition
                     classify_text_list = json.loads(classify_result_text)
                     for classify_text in classify_text_list:
                         if classify_text == "action":
-                            logging.debug(f"act : {asr_msg_text}")
+                            logging.info(f"act : {asr_msg_text}")
                             act_queue.put(asr_msg_text)
                         elif classify_text == "img":
-                            logging.debug(f"img : {asr_msg_text}")
+                            logging.info(f"img : {asr_msg_text}")
                             img_recognition_queue.put(asr_msg_text)
-                        elif classify_text == "face":
-                            logging.debug(f"face: {asr_msg_text}")
+                        elif classify_text == "open":
+                            logging.info(f"open: {asr_msg_text}")
+                            face_recognition_queue.put(asr_msg_text)
+                        elif classify_text == "close":
+                            logging.info(f"close: {asr_msg_text}")
                             face_recognition_queue.put(asr_msg_text)
                         else:
-                            logging.debug(f"chat: {asr_msg_text}")
+                            logging.info(f"chat: {asr_msg_text}")
                             chat_queue.put(asr_msg_text)
             #     else:
             #         tts_queue.get()

@@ -5,6 +5,7 @@ import requests
 import logging
 from urllib.parse import urlencode
 from robot.utils.utils_wav import play_mp3_from_binary, play_mp3_file
+from robot.tts.pyttsx3_tts import play_sound
 
 
 class TTSApiChain(object):
@@ -53,6 +54,8 @@ class TTSApiChain(object):
 
 
 def text_to_wav_file(host, text):
+    play_sound(text)
+    return
     """将text文本转为wav音频文件"""
     tts_client = TTSApiChain(host)
 

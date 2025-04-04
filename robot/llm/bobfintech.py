@@ -43,7 +43,7 @@ class BobfintechModel(Model):
         if conversation_id is not None:
             data['conversationId'] = conversation_id
 
-        logging.info(f"request data: {data}")
+        # logging.info(f"request data: {data}")
 
         response = requests.post(self.api_url, headers=headers, json=data)
 

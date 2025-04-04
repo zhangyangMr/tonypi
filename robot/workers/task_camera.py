@@ -21,7 +21,7 @@ def task_camera(chat_queue, act_queue, img_recognition_queue, face_recognition_q
             cv2.imwrite("frame.jpg", frame)
 
             # 在窗口中显示视频流
-            cv2.imshow("Face Recognition", frame)
+            cv2.imshow("Camera Video", frame)
 
             # # frame = cv2.remap(frame, mapx, mapy, cv2.INTER_LINEAR)  # 畸变矫正(distortion correction)
             # cv2.imshow('Frame', frame)
