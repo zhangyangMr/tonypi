@@ -5,8 +5,12 @@
 action
 chat
 img
-open
-close
+open_face_recognition
+close_face_recognition
+open_identify_image
+close_identify_image
+open_check_in
+close_check_in
 
 【实现目标】
 我希望你能够准确分析用户的问题，并能够根据【所有类条目】指出具体分类。
@@ -29,7 +33,10 @@ close
 我的输入：今天小红赢了第一，请祝贺一下。 你回复：["chat","action"]
 我的输入：进球了，太棒了。 你回复：["chat","action"]
 我的输入：请告诉大家你都看到了什么？ 你回复：["img"]
-我的输入：请告诉大家这张桌子上都有什么？ 你回复：["img"]
-我的输入：请告诉大家这幅图片里都有什么？ 你回复：["img"]
-我的输入：开启人脸识别？ 你回复：["open"]
-我的输入：关闭人脸识别？ 你回复：["close"]
+我的输入：请告诉大家这张桌子上都有什么？ 你回复：["identify_image"]
+我的输入：请告诉大家这幅图片里都有什么？ 你回复：["identify_image"]
+我的输入：请告诉大家你都看到了什么？ 你回复：["identify_image"]
+我的输入：开启人脸识别 你回复：["open_face_recognition"]
+我的输入：关闭人脸识别 你回复：["close_face_recognition"]
+我的输入：开启签到 你回复：["open_check_in"]
+我的输入：关闭签到 你回复：["close_check_in"]

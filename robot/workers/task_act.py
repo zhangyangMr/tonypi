@@ -2,11 +2,18 @@
 import logging
 import time
 import json
+import platform
 
 from robot.llm.llm_factory import ModelFactory
 from robot.utils.utils import deal_maas_response
 from robot.tts.text_to_wav_file import text_to_wav_file
-from robot.utils.utils_robot import *
+from robot.workers.task_camera import system_type
+
+system_type = platform.system()
+
+if system_type == "Linux":
+    from robot.utils.utils_robot import *
+
 
 def task_act(chat_queue, act_queue, img_recognition_queue, face_recognition_queue, config):
     logging.info("task_act workers start...")
@@ -44,6 +51,7 @@ def task_act(chat_queue, act_queue, img_recognition_queue, face_recognition_queu
         # 执行动作
         for ac in robot_action:
             logging.info(f"执行动作: {ac}")
-            eval(ac)
+            if system_type == "Linux":
+                eval(ac)
 
         act_queue.task_done()

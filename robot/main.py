@@ -1,22 +1,24 @@
 # -*- coding: utf-8 -*-
 import sys
-# sys.path.append("D:\\gopath\\src\\github.com\\TommyZihao\\tonypi")
-sys.path.append("/home/pi/zhangyang")
+import platform
 
-import pyaudio
-import logging
-import json
+system_type = platform.system()
+
+if system_type == "Windows":
+    sys.path.append("D:\\gopath\\src\\github.com\\TommyZihao\\tonypi")
+elif system_type == "Linux":
+    sys.path.append("/home/pi/tonypi")
+
 import time
 import queue
 import logging
 import threading
 from robot.config.config import load_config
-from robot.stt.asr import AsrOnline
 from robot.workers.task_chat import task_chat
 from robot.workers.task_act import task_act
 from robot.workers.task_classify import task_classify
 from robot.workers.task_img import task_img
-from robot.workers.task_face import task_face
+# from robot.workers.task_face import task_face
 from robot.workers.task_camera import task_camera
 
 if __name__ == "__main__":
@@ -43,7 +45,7 @@ if __name__ == "__main__":
         target=task_classify,
         args=(chat_queue, act_queue, img_recognition_queue, face_recognition_queue, config),
         name="ClassifyWorker",
-        daemon=True  # 设为守护线程随主线程退出
+        daemon=True
     )
     workers.append(classify_worker)
 
@@ -51,7 +53,7 @@ if __name__ == "__main__":
         target=task_chat,
         args=(chat_queue, act_queue, img_recognition_queue, face_recognition_queue, config),
         name="ChatWorker",
-        daemon=True  # 设为守护线程随主线程退出
+        daemon=True
     )
     workers.append(chat_worker)
 
@@ -59,7 +61,7 @@ if __name__ == "__main__":
         target=task_act,
         args=(chat_queue, act_queue, img_recognition_queue, face_recognition_queue, config),
         name="ActWorker",
-        daemon=True  # 设为守护线程随主线程退出
+        daemon=True
     )
     workers.append(act_worker)
 
@@ -67,7 +69,7 @@ if __name__ == "__main__":
         target=task_camera,
         args=(chat_queue, act_queue, img_recognition_queue, face_recognition_queue, config),
         name="CameraWorker",
-        daemon=True  # 设为守护线程随主线程退出
+        daemon=True
     )
     workers.append(camera_worker)
 
@@ -75,17 +77,17 @@ if __name__ == "__main__":
         target=task_img,
         args=(chat_queue, act_queue, img_recognition_queue, face_recognition_queue, config),
         name="ImgWorker",
-        daemon=True  # 设为守护线程随主线程退出
+        daemon=True
     )
     workers.append(img_worker)
 
-    face_worker = threading.Thread(
-        target=task_face,
-        args=(chat_queue, act_queue, img_recognition_queue, face_recognition_queue, config),
-        name="FaceWorker",
-        daemon=True  # 设为守护线程随主线程退出
-    )
-    workers.append(face_worker)
+    # face_worker = threading.Thread(
+    #     target=task_face,
+    #     args=(chat_queue, act_queue, img_recognition_queue, face_recognition_queue, config),
+    #     name="FaceWorker",
+    #     daemon=True
+    # )
+    # workers.append(face_worker)
 
     # 启动所有线程
     for worker in workers:

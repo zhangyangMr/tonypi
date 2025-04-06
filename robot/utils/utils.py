@@ -2,6 +2,10 @@
 import logging
 import base64
 import re
+
+import subprocess
+import psutil
+import time
 from urllib.parse import urlencode, quote, quote_plus
 from pypinyin import pinyin, lazy_pinyin, Style  # 需要安装 pypinyin 模块
 
@@ -88,3 +92,53 @@ def contains_substring(text, substring):
         return True
     else:
         return False
+
+
+def start_script(script_path):
+    """
+    启动一个python脚本，并返回进程对象
+
+    :param: script_path: python脚本路径
+
+    :return: process: 启动python脚本成功的进程
+    """
+    try:
+        process = subprocess.Popen(["python", script_path])
+        logging.info(f"脚本 {script_path} 已启动，PID: {process.pid}")
+        return process
+    except FileNotFoundError:
+        logging.error(f"脚本 {script_path} 未找到")
+    except Exception as e:
+        logging.error(f"启动脚本时出错：{e}")
+
+
+def close_process(process):
+    """
+    关闭一个进程
+
+    :param: process: 进程对象
+    """
+    try:
+        process.terminate()  # 发送终止信号
+        process.wait()  # 等待进程结束
+        logging.info(f"进程 {process.pid} 已关闭")
+    except Exception as e:
+        logging.info(f"关闭进程时出错：{e}")
+
+
+def close_script_with_psutil(script_name):
+    """
+    关闭一个 Python 脚本
+
+    :param: script_path: python脚本路径
+    """
+    try:
+        for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+            logging.info(f"正在检查进程 {proc.info['name']}")
+            logging.info(f"正在检查进程 {proc.info['cmdline']}")
+            if proc.info['name'] == "python" and script_name in proc.info['cmdline']:
+                proc.terminate()
+                proc.wait()
+                logging.info(f"脚本 {script_name} 已关闭")
+    except Exception as e:
+        logging.error(f"关闭脚本时出错：{e}")

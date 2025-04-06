@@ -5,10 +5,11 @@ import time
 import cv2
 import threading
 
-from robot.face_recognition.face_dlib_real import recognize_face, load_known_faces_from_csv, swapped_person_names
+from robot.face_recognition.face_dlib_real import recognize_face, load_known_faces_from_csv
 from robot.llm.llm_factory import ModelFactory
 from robot.utils.utils import deal_maas_response
 from robot.tts.text_to_wav_file import text_to_wav_file
+from robot.utils.utils_camera import put_text_2_img
 
 
 def task_face(chat_queue, act_queue, img_recognition_queue, face_recognition_queue, config):
@@ -25,14 +26,6 @@ def task_face(chat_queue, act_queue, img_recognition_queue, face_recognition_que
     #
     # tts_base_url = config.get('tts')['bobfintech']['tts_base_url']
 
-    stop_event = threading.Event()
-    face_task = threading.Thread(
-        target=woker_face,
-        args=(config, stop_event),
-        name="face_tak",
-        daemon=True  # 设为守护线程随主线程退出
-    )
-
     while True:
         time.sleep(0.1)
 
@@ -40,15 +33,25 @@ def task_face(chat_queue, act_queue, img_recognition_queue, face_recognition_que
             continue
 
         asr_msg_text = face_recognition_queue.get()
+        logging.info(f"asr_msg_text:{asr_msg_text}")
 
-        if asr_msg_text == "open":
-            if face_task.is_alive():
-                continue
+        if asr_msg_text == "open" or asr_msg_text == "close":
+            stop_event = threading.Event()
+            face_task = threading.Thread(
+                target=woker_face,
+                args=(config, stop_event),
+                name="face_task",
+                daemon=True  # 设为守护线程随主线程退出
+            )
+
+            if asr_msg_text == "open":
+                if face_task.is_alive():
+                    continue
+                else:
+                    face_task.start()
             else:
-                face_task.start()
-        else:
-            stop_event.set()
-            face_task.join()
+                stop_event.set()
+                face_task.join()
 
         # if asr_msg_text == "开启":
         #     while True:
@@ -95,10 +98,9 @@ def woker_face(config, stop_event):
         result = recognize_face(frame, known_faces, known_labels)
         # 在窗口中显示识别结果
         if result != "Unknown" and result != "No face detected":
-            logging.info(f"Recognized: {swapped_person_names.get(result)}")
-            cv2.putText(frame, f"Welcome, {swapped_person_names.get(result)}!", (50, 50),
-                        cv2.FONT_HERSHEY_SIMPLEX,
-                        1, (0, 255, 0), 2)
+            logging.info(f"Recognized: {result}")
+            frame=put_text_2_img(frame, f"Welcome, {result}!")
+            cv2.imshow("Face Recognition", frame)
 
             chat_response = llm_factory.chat(f"给{result}打招呼")
             chat_result = deal_maas_response(chat_response)
@@ -107,6 +109,6 @@ def woker_face(config, stop_event):
             chat_result_text = chat_result["text"]
             text_to_wav_file(tts_base_url, chat_result_text)
         else:
-            cv2.putText(frame, "Unknown Person", (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            frame=put_text_2_img(frame, f"Unknown Person!")
+            cv2.imshow("Face Recognition", frame)
 
-        cv2.imshow("Face Recognition", frame)
