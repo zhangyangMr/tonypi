@@ -9,6 +9,9 @@
 ├── prompt                  # 相关提示词
 ├── README.md               # 说明文档
 ├── TonyPi                  # 幻尔机器人内部相关代码（示例代码和hiwonder-sdk）
+├── face_check_in           # 人脸签到单独功能代码
+├── face_recognition        # 人脸识别单独功能代码
+├── robot                   # 机器人集成全部功能代码
 
 ```
 
@@ -31,8 +34,6 @@ sys_conf:
 ```
 
 ### 2.2 baidu_img.py
-
-
 
 以下key可以从https://ai.baidu.com/tech/imagerecognition/image_understanding 申请试用
 
