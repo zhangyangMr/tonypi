@@ -62,7 +62,10 @@ def load_known_faces(folder_path):
     for filename in os.listdir(folder_path):
         if filename.endswith(".jpg") or filename.endswith(".png"):
             img_path = os.path.join(folder_path, filename)
-            img = dlib.load_rgb_image(img_path)
+            img_path = img_path.replace("\\", "/")
+            img_rd = io.imread(img_path)
+            img = cv2.cvtColor(img_rd, cv2.COLOR_BGR2RGB)
+            # img = dlib.load_rgb_image(img_path)
             faces = detector(img)
             if faces:
                 shape = predictor(img, faces[0])
@@ -98,12 +101,13 @@ def load_known_faces_with_persons():
     logging.info("Features saved to features.csv")
 
 
-def load_known_faces_with_one_persons():
+def load_known_faces_with_one_person():
     # 加载已知人脸数据库
-    known_faces, known_labels = load_known_faces("./images")
+    known_faces, known_labels = load_known_faces("./images_one_person")
     save_features_to_csv(known_faces, known_labels, "features.csv")
 
 
 if __name__ == "__main__":
-    # load_known_faces_with_one_persons()
-    load_known_faces_with_persons()
+    load_known_faces_with_one_person()
+    # load_known_faces_with_persons()
+#

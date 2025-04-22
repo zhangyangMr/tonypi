@@ -49,7 +49,7 @@ def get_face_descriptor(img):
     return face_descriptor
 
 
-def recognize_face(frame, known_faces, known_labels, threshold=0.6):
+def recognize_face(frame, known_faces, known_labels, threshold=0.95):
     """
     人脸识别函数。
 

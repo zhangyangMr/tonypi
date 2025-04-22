@@ -3,6 +3,7 @@ import json
 from typing import List, Dict, Union, Any
 import requests
 import logging
+import asyncio
 from urllib.parse import urlencode
 from utils_sound import play_mp3_file
 from pyttsx3_tts import play_sound
@@ -61,13 +62,13 @@ def text_to_wav_file(text, host):
     :param text: 需要合成语音的文字
     :param host: tts服务的请求地址
     """
-    play_sound(text)
-    return
+    # play_sound(text)
+    # return
 
-    """将text文本转为wav音频文件"""
+    # """将text文本转为wav音频文件"""
     tts_client = TTSApiChain(host)
 
-    url = "/multimodal/voice/tts/file"
+    url = "/tts/voice/file"
 
     data = {
         "text": text,

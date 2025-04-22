@@ -1,0 +1,9 @@
+dlib
+opencv-python
+pillow
+requests
+pyaudio
+pyttsx3
+pyyaml
+scikit-learn
+pydub

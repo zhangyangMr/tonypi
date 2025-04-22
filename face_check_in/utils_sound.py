@@ -128,8 +128,14 @@ def play_mp3(mp3_file_path):
     audio = AudioSegment.from_file(mp3_file_path)
 
     # 播放音频
-    play(audio)
+    play_with_prefix(audio)
 
+def play_with_prefix(audio, silence_duration=1000):
+    # 创建静音片段（单位：毫秒）
+    silence = AudioSegment.silent(duration=silence_duration)
+    # 合并静音和原始音频
+    audio_with_prefix = silence + audio
+    play(audio_with_prefix)
 
 def play_mp3_file(mp3_binary_data):
     save_mp3_to_file(mp3_binary_data, "sound.mp3")
