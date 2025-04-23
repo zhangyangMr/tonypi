@@ -11,22 +11,24 @@ import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s %(filename)s:%(lineno)d - %(message)s')
 
 # 初始化 dlib 模型
-detector = dlib.get_frontal_face_detector()
+detector = dlib.cnn_face_detection_model_v1("mmod_human_face_detector.dat")
 predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 face_rec = dlib.face_recognition_model_v1("dlib_face_recognition_resnet_model_v1.dat")
 
 
 # 提取单张图片的 128D 特征
 def return_128d_features(path_img):
+    global face_descriptor
     img_rd = io.imread(path_img)
     img_gray = cv2.cvtColor(img_rd, cv2.COLOR_BGR2RGB)
     faces = detector(img_gray, 1)
 
-    if len(faces) != 0:
-        shape = predictor(img_gray, faces[0])  # 获取68个特征点（可选）
+    if len(faces) == 1:  # 确保图像中只有一张人脸
+        shape = predictor(img_gray, faces[0].rect)  # 获取68个特征点（可选）
         face_descriptor = face_rec.compute_face_descriptor(img_gray, shape)  # 计算128维特征向量
     else:
         face_descriptor = None
+
     return face_descriptor
 
 
@@ -66,13 +68,15 @@ def load_known_faces(folder_path):
             img_rd = io.imread(img_path)
             img = cv2.cvtColor(img_rd, cv2.COLOR_BGR2RGB)
             # img = dlib.load_rgb_image(img_path)
-            faces = detector(img, 1)
+            faces = detector(img)
             if faces:
-                shape = predictor(img, faces[0])  # 获取68个特征点（可选）
-                face_descriptor = face_rec.compute_face_descriptor(img, shape)  # 计算128维特征向量
+                shape = predictor(img, faces[0])
+                face_descriptor = face_rec.compute_face_descriptor(img, shape)
                 known_faces.append(face_descriptor)
 
                 name = filename.split('.')[0]
+                # logging.info(f"name: {name}; person_names.get(name): {person_names.get(name)}")
+                # known_labels.append(person_names.get(name))
                 logging.info(f"name: {name}")
                 known_labels.append(name)
     return np.array(known_faces), known_labels
@@ -95,14 +99,14 @@ def load_known_faces_with_persons():
             features.append(features_mean_personX)
             names.append(person)
 
-    save_features_to_csv(features, names, "features_128.csv")
+    save_features_to_csv(features, names, "features.csv")
     logging.info("Features saved to features.csv")
 
 
 def load_known_faces_with_one_person():
     # 加载已知人脸数据库
     known_faces, known_labels = load_known_faces("./images_one_person")
-    save_features_to_csv(known_faces, known_labels, "features_128.csv")
+    save_features_to_csv(known_faces, known_labels, "features.csv")
 
 
 if __name__ == "__main__":

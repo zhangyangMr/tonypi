@@ -78,11 +78,13 @@ def call_camera(tts_url, sys_conf):
     # 创建sqlite数据库连接
     conn = create_database("sign_in_records")
 
+    features_path = sys_conf.get("camera")["features_path"]
+
     # 插入签到人员信息
-    insert_csv_data(conn, "./features.csv")
+    insert_csv_data(conn, features_path)
 
     # 加载已知人脸数据库
-    known_faces, known_labels = load_known_faces_from_csv("./features.csv")
+    known_faces, known_labels = load_known_faces_from_csv(features_path)
 
     # 打开摄像头
     if system_type == "Linux":

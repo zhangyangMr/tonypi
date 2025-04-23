@@ -9,7 +9,8 @@ from PIL import Image, ImageDraw, ImageFont
 from sklearn.metrics.pairwise import cosine_similarity
 
 # 初始化 dlib 的人脸检测器、关键点检测器和特征提取器
-detector = dlib.get_frontal_face_detector()
+# detector = dlib.get_frontal_face_detector()
+detector = dlib.cnn_face_detection_model_v1("mmod_human_face_detector.dat")
 predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 face_rec_model = dlib.face_recognition_model_v1("dlib_face_recognition_resnet_model_v1.dat")
 
@@ -49,6 +50,22 @@ def get_face_descriptor(img):
     return face_descriptor
 
 
+def get_face_descriptor_128d(img):
+    """
+    计算人脸特征。
+
+    :param img: 人脸图片
+
+    :return face_descriptor: 返回人脸特征
+    """
+    faces = detector(img)
+    if not faces:
+        return None
+    shape = predictor(img, faces[0].rect)
+    face_descriptor = face_rec_model.compute_face_descriptor(img, shape)
+    return face_descriptor
+
+
 def recognize_face(frame, known_faces, known_labels, threshold=0.95):
     """
     人脸识别函数。
@@ -60,7 +77,8 @@ def recognize_face(frame, known_faces, known_labels, threshold=0.95):
 
     :return known_label: 返回识别出的对应人名
     """
-    face_descriptor = get_face_descriptor(frame)
+    # face_descriptor = get_face_descriptor(frame)
+    face_descriptor = get_face_descriptor_128d(frame)
     if face_descriptor is None:
         return "No face detected"
 
